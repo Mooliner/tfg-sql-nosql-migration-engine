@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Docker i Dades
+postgres_data/
+mongo_data/
+
+# Entorn i secrets
+.env

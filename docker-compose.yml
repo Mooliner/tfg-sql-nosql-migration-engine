@@ -1,0 +1,29 @@
+services:
+  # Base de dades Relacional (PostgreSQL)
+  db_sql:
+    image: postgres:15
+    container_name: postgres_tfg
+    environment:
+      POSTGRES_USER: usuari_tfg
+      POSTGRES_PASSWORD: password_tfg_1234
+      POSTGRES_DB: tfg_relacional
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data 
+
+  # Base de dades NoSQL (MongoDB)
+  db_nosql:
+    image: mongo:6
+    container_name: mongo_tfg
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin1234
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  postgres_data:
+  mongo_data:
