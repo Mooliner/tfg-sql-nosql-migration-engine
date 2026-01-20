@@ -6,3 +6,4 @@ pymongo
 pydantic
 pydantic-settings
 confluent-kafka
+passlib[bcrypt]
