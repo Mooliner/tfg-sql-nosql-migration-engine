@@ -1,0 +1,14 @@
+{
+    "name": "connector-postgres",
+    "config": {
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+        "plugin.name": "pgoutput",
+        "database.hostname": "postgres_tfg",
+        "database.port": "5432",
+        "database.user": "usuari_tfg",
+        "database.password": "password_tfg_1234",
+        "database.dbname": "tfg_relacional",
+        "topic.prefix": "tfg_relacional",
+        "table.include.list": "public.users, public.productes"
+    }
+}
