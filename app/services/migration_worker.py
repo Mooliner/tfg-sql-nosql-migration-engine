@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
+import os
 
 config = {
     'bootstrap.servers': 'localhost:59092',
@@ -15,10 +16,9 @@ consumer = Consumer(config)
 topic = "tfg_relacional.public.users"
 consumer.subscribe([topic])
 
-user = os.getenv("MONGO_USER")
-pwd = os.getenv("MONGO_PWD")
+link = os.getenv("MONGO_URL")
 
-client = MongoClient(f'mongodb://{user}:{pwd}@localhost:27017/')
+client = MongoClient(link)
 db = client['tfg_nosql']
 
 
@@ -42,26 +42,37 @@ def start_worker():
     try:
         while True:
             msg = consumer.poll(1.0)
-
             if msg is None:
                 continue
             if msg.error():
                 print(f"Error: {msg.error()}")
-                continue            
-
+                continue
+            if msg.value() is None:
+                continue
+            
             raw_data = json.loads(msg.value().decode('utf-8'))
-
-            payload_after = raw_data['payload']['after']
-            nom_taula = raw_data['payload']['source']['table']
+            payload = raw_data['payload']
+            operacio = payload['op']
+            nom_taula = payload['source']['table']
+            print(f"DEBUG: Guardant a la base de dades '{db.name}' i a la col·lecció '{nom_taula}'")
             colleccion = db[nom_taula]
 
-            dada_neta = transformar(payload_after)           
+            match operacio:
+                case 'c' | 'u':
+                    dada_neta = transformar(payload['after'])
+                    filtret = {"id": dada_neta["id"]}
+                    accions = {"$set": dada_neta}
+                    colleccion.update_one(filtret, accions, upsert=True)
+                    print(f"Sincronitzat (C/U): {dada_neta.get('username', dada_neta['id'])}")
 
-            filter = {"id" : dada_neta["id"]}
-            accions = {"$set" : dada_neta}
+                case 'd':
+                    id_a_esborrar = payload['before']['id']
+                    colleccion.delete_one({"id": id_a_esborrar})
+                    print(f"Esborrat ID: {id_a_esborrar}")
 
-            colleccion.update_one(filter, accions, upsert=True)
-            print(f"Funciona: {dada_neta['username']}")
+                case 'r':
+                    dada_neta = transformar(payload['after'])
+                    colleccion.update_one({"id": dada_neta["id"]}, {"$set": dada_neta}, upsert=True)
 
     except KeyboardInterrupt:
         print("\nATURAT")
