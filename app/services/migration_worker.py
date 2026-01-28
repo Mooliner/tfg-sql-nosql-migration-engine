@@ -57,23 +57,21 @@ def start_worker():
             print(f"DEBUG: Guardant a la base de dades '{db.name}' i a la col·lecció '{nom_taula}'")
             colleccion = db[nom_taula]
 
-            match operacio:
-                case 'c' | 'u':
-                    dada_neta = transformar(payload['after'])
-                    filtret = {"id": dada_neta["id"]}
-                    accions = {"$set": dada_neta}
-                    colleccion.update_one(filtret, accions, upsert=True)
-                    print(f"Sincronitzat (C/U): {dada_neta.get('username', dada_neta['id'])}")
 
-                case 'd':
-                    id_a_esborrar = payload['before']['id']
-                    colleccion.delete_one({"id": id_a_esborrar})
-                    print(f"Esborrat ID: {id_a_esborrar}")
-
-                case 'r':
-                    dada_neta = transformar(payload['after'])
-                    colleccion.update_one({"id": dada_neta["id"]}, {"$set": dada_neta}, upsert=True)
-
+            if operacio == 'c' or operacio == 'u':
+                dada_neta = transformar(payload['after'])
+                filtret = {"id": dada_neta["id"]}
+                accions = {"$set": dada_neta}
+                colleccion.update_one(filtret, accions, upsert=True)
+                print(f"Sincronitzat (C/U): {dada_neta.get('username', dada_neta['id'])}")
+            elif operacio == 'd':
+                id_a_esborrar = payload['before']['id']
+                colleccion.delete_one({"id": id_a_esborrar})
+                print(f"Esborrat ID: {id_a_esborrar}")
+            elif operacio == 'r':
+                dada_neta = transformar(payload['after'])
+                colleccion.update_one({"id": dada_neta["id"]}, {"$set": dada_neta}, upsert=True)
+                
     except KeyboardInterrupt:
         print("\nATURAT")
     finally:
