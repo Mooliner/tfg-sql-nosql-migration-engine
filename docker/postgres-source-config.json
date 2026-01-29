@@ -9,6 +9,6 @@
         "database.password": "password_tfg_1234",
         "database.dbname": "tfg_relacional",
         "topic.prefix": "tfg_relacional",
-        "table.include.list": "public.users, public.productes"
+        "table.include.list": "public.users, public.orders"
     }
 }
