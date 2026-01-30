@@ -13,8 +13,8 @@ config = {
 }
 
 consumer = Consumer(config)
-topic = "tfg_relacional.public.users"
-consumer.subscribe([topic])
+topics = ["tfg_relacional.public.users", "tfg_relacional.public.orders"]
+consumer.subscribe(topics)
 
 link = os.getenv("MONGO_URL")
 
@@ -37,7 +37,7 @@ def transformar(dada):
     return nova_dada
 
 def start_worker():
-    print(f"Escoltant el tòpic: {topic}...")
+    print(f"Escoltant el tòpic: {topics}...")
 
     try:
         while True:
@@ -51,27 +51,54 @@ def start_worker():
                 continue
             
             raw_data = json.loads(msg.value().decode('utf-8'))
-            payload = raw_data['payload']
-            operacio = payload['op']
-            nom_taula = payload['source']['table']
-            print(f"DEBUG: Guardant a la base de dades '{db.name}' i a la col·lecció '{nom_taula}'")
-            colleccion = db[nom_taula]
+            
+            print(f"CRASH DEBUG - JSON rebut: {raw_data}")
 
+            operacio = raw_data['op']
+            nom_taula = raw_data['source']['table']
+            #print(f"DEBUG: Guardant a la base de dades '{db.name}' i a la col·lecció 'users'")
+            colleccion = db["users"]
 
-            if operacio == 'c' or operacio == 'u':
-                dada_neta = transformar(payload['after'])
-                filtret = {"id": dada_neta["id"]}
-                accions = {"$set": dada_neta}
-                colleccion.update_one(filtret, accions, upsert=True)
-                print(f"Sincronitzat (C/U): {dada_neta.get('username', dada_neta['id'])}")
-            elif operacio == 'd':
-                id_a_esborrar = payload['before']['id']
-                colleccion.delete_one({"id": id_a_esborrar})
-                print(f"Esborrat ID: {id_a_esborrar}")
-            elif operacio == 'r':
-                dada_neta = transformar(payload['after'])
-                colleccion.update_one({"id": dada_neta["id"]}, {"$set": dada_neta}, upsert=True)
+            if(nom_taula == 'users'):
+                if operacio == 'c' or operacio == 'u':
+                    dada_neta = transformar(raw_data['after'])
+                    filtret = {"id": dada_neta["id"]}
+                    accions = {"$set": dada_neta}
+                    colleccion.update_one(filtret, accions, upsert=True)
+                    print(f"Sincronitzat (C/U): {dada_neta.get('username', dada_neta['id'])}")
                 
+                elif operacio == 'd':
+                    id_a_esborrar = raw_data['before']['id']
+                    colleccion.delete_one({"id": id_a_esborrar})
+                    print(f"Esborrat ID: {id_a_esborrar}")
+                
+                elif operacio == 'r':
+                    dada_neta = transformar(raw_data['after'])
+                    colleccion.update_one({"id": dada_neta["id"]}, {"$set": dada_neta}, upsert=True)
+
+            elif(nom_taula == 'orders'):
+                if operacio == 'c' or operacio == 'r':
+                    comanda_neta = transformar(raw_data['after'])
+                    user_id = int(comanda_neta['user_id'])
+                    colleccion.update_one({"id": user_id}, {"$push": {"orders": comanda_neta}}, upsert=True)
+                    print(f"Comanda afegida a l'usuari {user_id}")
+
+                elif operacio == 'd':
+                    comanda_neta = transformar(raw_data['before'])
+                    print("Comanda neta: ", comanda_neta)
+                    print("User id: ", comanda_neta['user_id'])
+                    user_id = int(comanda_neta['user_id'])
+                    colleccion.update_one({"id": user_id}, {"$pull": {"orders": {"id": comanda_neta['id']}}}, upsert=True)
+                    print(f"Comanda esborrada de l'usuari {user_id}")
+                
+                elif operacio == 'u':
+                    comanda_neta = transformar(raw_data['after'])
+                    user_id = int(comanda_neta['user_id'])
+                    filter_id = {"id": user_id, "orders.id": comanda_neta['id']}
+                    accion = {"$set": {"orders.$": comanda_neta}}
+                    colleccion.update_one(filter_id, accion)
+                    print(f"Comanda actualitzada a l'usuari {user_id}")
+           
     except KeyboardInterrupt:
         print("\nATURAT")
     finally:
