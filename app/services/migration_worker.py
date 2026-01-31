@@ -80,7 +80,7 @@ def start_worker():
                 if operacio == 'c' or operacio == 'r':
                     comanda_neta = transformar(raw_data['after'])
                     user_id = int(comanda_neta['user_id'])
-                    colleccion.update_one({"id": user_id}, {"$push": {"orders": comanda_neta}}, upsert=True)
+                    colleccion.update_one({"id": user_id, "orders.id": {"$ne": comanda_neta['id']} },{"$push": {"orders": comanda_neta}}, upsert=False)
                     print(f"Comanda afegida a l'usuari {user_id}")
 
                 elif operacio == 'd':
