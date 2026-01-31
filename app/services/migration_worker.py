@@ -5,6 +5,9 @@ from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 import os
+from app.log_config import get_logger
+
+logger = get_logger("WORKER")
 
 config = {
     'bootstrap.servers': 'localhost:59092',
@@ -45,18 +48,17 @@ def start_worker():
             if msg is None:
                 continue
             if msg.error():
-                print(f"Error: {msg.error()}")
+                logger.error(f"Error Kafka: {msg.error()}")
                 continue
             if msg.value() is None:
                 continue
             
             raw_data = json.loads(msg.value().decode('utf-8'))
             
-            print(f"CRASH DEBUG - JSON rebut: {raw_data}")
+            logger.info(f"JSON rebut: {raw_data}")
 
             operacio = raw_data['op']
             nom_taula = raw_data['source']['table']
-            #print(f"DEBUG: Guardant a la base de dades '{db.name}' i a la col·lecció 'users'")
             colleccion = db["users"]
 
             if(nom_taula == 'users'):
@@ -65,12 +67,12 @@ def start_worker():
                     filtret = {"id": dada_neta["id"]}
                     accions = {"$set": dada_neta}
                     colleccion.update_one(filtret, accions, upsert=True)
-                    print(f"Sincronitzat (C/U): {dada_neta.get('username', dada_neta['id'])}")
+                    logger.info(f"[USERS](C/U): {dada_neta.get('username', dada_neta['id'])}")
                 
                 elif operacio == 'd':
                     id_a_esborrar = raw_data['before']['id']
                     colleccion.delete_one({"id": id_a_esborrar})
-                    print(f"Esborrat ID: {id_a_esborrar}")
+                    logger.info(f"[USERS](D): {id_a_esborrar}")
                 
                 elif operacio == 'r':
                     dada_neta = transformar(raw_data['after'])
@@ -81,15 +83,13 @@ def start_worker():
                     comanda_neta = transformar(raw_data['after'])
                     user_id = int(comanda_neta['user_id'])
                     colleccion.update_one({"id": user_id, "orders.id": {"$ne": comanda_neta['id']} },{"$push": {"orders": comanda_neta}}, upsert=False)
-                    print(f"Comanda afegida a l'usuari {user_id}")
+                    logger.info(f"[ORDERS] (C): {user_id}")
 
                 elif operacio == 'd':
                     comanda_neta = transformar(raw_data['before'])
-                    print("Comanda neta: ", comanda_neta)
-                    print("User id: ", comanda_neta['user_id'])
                     user_id = int(comanda_neta['user_id'])
-                    colleccion.update_one({"id": user_id}, {"$pull": {"orders": {"id": comanda_neta['id']}}}, upsert=True)
-                    print(f"Comanda esborrada de l'usuari {user_id}")
+                    colleccion.update_one({"id": user_id}, {"$pull": {"orders": {"id": comanda_neta['id']}}}, upsert=False)
+                    logger.info(f"[ORDERS] (D): {user_id}")
                 
                 elif operacio == 'u':
                     comanda_neta = transformar(raw_data['after'])
@@ -97,7 +97,7 @@ def start_worker():
                     filter_id = {"id": user_id, "orders.id": comanda_neta['id']}
                     accion = {"$set": {"orders.$": comanda_neta}}
                     colleccion.update_one(filter_id, accion)
-                    print(f"Comanda actualitzada a l'usuari {user_id}")
+                    logger.info(f"[ORDERS] (U): {user_id}")
            
     except KeyboardInterrupt:
         print("\nATURAT")
