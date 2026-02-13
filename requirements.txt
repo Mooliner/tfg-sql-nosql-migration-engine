@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pymongo
+pydantic
+pydantic-settings
+confluent-kafka
+passlib[bcrypt]
