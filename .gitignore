@@ -11,7 +11,6 @@ mongo_data/
 # Entorn i secrets
 .env
 env/
-/env
 
 # macOS
 .DS_Store

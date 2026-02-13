@@ -1,0 +1,7 @@
+POSTGRES_USER=usuari_tfg
+POSTGRES_PASSWORD=password_tfg_1234
+POSTGRES_SERVER=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=tfg_relacional
+
+MONGO_URL=mongodb://admin:admin1234@localhost:27017
