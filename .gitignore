@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+venv/
 
 # Docker i Dades
 postgres_data/
@@ -9,3 +10,7 @@ mongo_data/
 
 # Entorn i secrets
 .env
+env/
+
+# macOS
+.DS_Store

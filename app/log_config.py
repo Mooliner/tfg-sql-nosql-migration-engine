@@ -1,6 +1,7 @@
 import logging
 import os
 
+# Configuración del logger
 def get_logger(name):
     logger = logging.getLogger(name)
     
