@@ -14,3 +14,5 @@
 [2026-02-13 19:40:32,067] [INFO] [WORKER] [USERS](C/U): gerard_mac11
 [2026-02-13 19:46:35,516] [INFO] [WORKER] JSON rebut: {'before': None, 'after': {'id': 3, 'description': 'Subscripció TFG Premium', 'amount': 'E4c=', 'user_id': 1, 'created_at': 1771008394955553}, 'source': {'version': '2.5.4.Final', 'connector': 'postgresql', 'name': 'tfg_relacional', 'ts_ms': 1771008394956, 'snapshot': 'false', 'db': 'tfg_relacional', 'sequence': '["26909592","26910448"]', 'schema': 'public', 'table': 'orders', 'txId': 747, 'lsn': 26910448, 'xmin': None}, 'op': 'c', 'ts_ms': 1771008395191, 'transaction': None}
 [2026-02-13 19:46:35,522] [INFO] [WORKER] [ORDERS] (C): 1
+[2026-02-18 11:23:41,037] [INFO] [WORKER] Escoltant els tòpics: ['tfg_relacional.public.users', 'tfg_relacional.public.orders']...
+[2026-02-18 11:26:46,669] [INFO] [WORKER] [ORDERS] (C): 2
