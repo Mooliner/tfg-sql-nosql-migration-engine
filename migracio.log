@@ -16,3 +16,8 @@
 [2026-02-13 19:46:35,522] [INFO] [WORKER] [ORDERS] (C): 1
 [2026-02-18 11:23:41,037] [INFO] [WORKER] Escoltant els tòpics: ['tfg_relacional.public.users', 'tfg_relacional.public.orders']...
 [2026-02-18 11:26:46,669] [INFO] [WORKER] [ORDERS] (C): 2
+[2026-02-18 11:34:51,896] [INFO] [WORKER] Escoltant els tòpics: ['tfg_relacional.public.users', 'tfg_relacional.public.orders']...
+[2026-02-18 11:34:54,990] [INFO] [WORKER] [USERS](C/U): gerard_gui_test
+[2026-02-18 11:39:12,928] [INFO] [WORKER] [USERS](D): 3
+[2026-02-18 11:39:35,562] [INFO] [WORKER] [USERS](C/U): gerard_gui_test
+[2026-02-18 11:39:47,637] [INFO] [WORKER] [USERS](D): 4

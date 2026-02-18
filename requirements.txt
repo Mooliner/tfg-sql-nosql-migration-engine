@@ -7,3 +7,4 @@ pydantic
 pydantic-settings
 confluent-kafka
 passlib[bcrypt]
+streamlit
