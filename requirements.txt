@@ -8,3 +8,4 @@ pydantic-settings
 confluent-kafka
 passlib[bcrypt]
 streamlit
+python-dotenv
